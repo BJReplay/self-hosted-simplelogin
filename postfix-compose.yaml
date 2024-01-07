@@ -19,7 +19,7 @@ services:
       - '587:587'
     volumes:
       - ./postfix/conf.d/:/etc/postfix/conf.d:rw
-      - ./acme.sh/conf.d/:/etc/acme.sh/:ro
+      - ./caddy-data/caddy/cloudflare/:/caddy-data/caddy/cloudflare/:ro
     restart: unless-stopped
     depends_on:
       - email
