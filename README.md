@@ -383,7 +383,7 @@ so that it uses the correct domain and postgresql credentials. Here are the temp
 Run the application using the following commands:
 
 ```sh
-./up.sh && docker logs -f 
+./up.sh --build && docker logs -f 
 ```
 
 You may also want to setup [Certificate Authority Authorization (CAA)](#caa) at this point.
