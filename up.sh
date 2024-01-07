@@ -16,8 +16,8 @@ if [ -z "$SUBDOMAIN" ]; then
 fi
 
 if [ ! -f ./Caddyfile ]; then
-  sed -e "s/app.domain.tld/${SUBDOMAIN}.${DOMAIN}/g" -e "s/domain.tld/${DOMAIN}/g" ./Caddyfile.tpl > ./Caddyfile
-  sed -e "s/app.domain.tld/${SUBDOMAIN}.${DOMAIN}/g" -e "s/domain.tld/${DOMAIN}/g" ./Caddyfile.tpl > ./Caddyfile
+  sed -e "s/app.domain.tld/${SUBDOMAIN}.${DOMAIN}/g" -e "s/domain.tld/${DOMAIN}/g" ./caddy/Caddyfile.tpl > ./Caddyfile
+  sed -e "s/app.domain.tld/${SUBDOMAIN}.${DOMAIN}/g" -e "s/domain.tld/${DOMAIN}/g" ./caddy/Caddyfile.tpl > ./Caddyfile
 fi
 
 sed -e "s/app.domain.tld/${SUBDOMAIN}.${DOMAIN}/g" -e "s/domain.tld/${DOMAIN}/g" ./postfix/conf.d/main.cf.tpl > ./postfix/conf.d/main.cf
