@@ -1,7 +1,7 @@
 version: "3.8"
 
 include:
-  - nginx-compose.yaml
+  - caddy-compose.yaml
   - simple-login-compose.yaml
   - postfix-compose.yaml
 
