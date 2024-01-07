@@ -12,7 +12,7 @@ If you don't have those particular needs, please use the original github source 
 
 ## Prerequisites
 
-- a Linux server (either a VM or dedicated server). This doc shows the setup for Ubuntu 22.04 LTS but the steps could be adapted for other popular Linux distributions. As most of components run as Docker container and Docker can be a bit heavy, having at least 2 GB of RAM is recommended. The server needs to have the port 25 (email), 80, 443 (for the webapp), 22 (so you can ssh into it) open.
+- a Linux server (either a VM or dedicated server). This doc shows the setup for Ubuntu 22.04 LTS but the steps could be adapted for other popular Linux distributions. As most of components run as Docker container and Docker can be a bit heavy, having at least 2 GB of RAM is recommended. The server needs to have the port 25 (email), 443 (for the webapp), 22 (so you can ssh into it) open.
 
 - a domain for which you can config the DNS. It could be a sub-domain. In the rest of the doc, let's say it's `mydomain.com` for the email and `app.mydomain.com` for SimpleLogin webapp. Please make sure to replace these values by your domain name and subdomain name whenever they appear in the doc. A trick we use is to download this README file on your computer and replace all `mydomain.com` and `app.mydomain.com` occurrences by your domain.
 
@@ -360,38 +360,11 @@ This includes:
 - set the `POSTGRES_PASSWORD` to match the postgres credentials.
 - set the `FLASK_SECRET` to an arbitrary secret key.
 
-The SSL certs are issued by the ACME server using either:
-
-- HTTP-01 ACME challenge
-- DNS-01 ACME challenge using acme.sh DNS integration
+The SSL certs are issued by the Caddy server using a Cloudflare DNS challenge.
 
 Set the following variables in `.env` to appropriate values:
 
-- set the `LE_STAGING` to `true` or `false`.
-- set the `ACME_CHALLENGE` variable to either `DNS-01` (default) or `HTTP-01`.
-- set the `ACME_SERVER` variable to any of the [supported servers by acme.sh](https://github.com/acmesh-official/acme.sh/wiki/Server). Default value is `zerossl`.
-
-If you are using DNS-01 ACME challenge, set `ACME_SH_DNS_API` to one of the
-[supported acme.sh DNS API](https://github.com/acmesh-official/acme.sh#8-automatic-dns-api-integration) plugins.
-
-This repository currently supports
-[Microsoft Azure](https://github.com/acmesh-official/acme.sh/wiki/dnsapi#37-use-azure-dns
-) and
-[Cloudflare](https://github.com/acmesh-official/acme.sh/wiki/dnsapi#a-using-a-restrictive-api-token) DNS integrations.
-
-
-If using Microsoft Azure, update the following values in `.env`:
-
-- set `AZUREDNS_TENANTID` to the Azure tenant hosting the domain DNS zone.
-- set `AZUREDNS_SUSCRIPTIONID` to the Azure subscription hosting the domain DNS zone.
-- set `AZUREDNS_CLIENTID` to the client id of a service principal with permissions to update the DNS zone.
-- set `AZUREDNS_CLIENTSECRET` to the client secret of a service principal with permissions to update the DNS zone.
-
-If using Cloudflare, update the following values in `.env`:
-
-- set `CF_Token` to the Cloudflare API token.
-- set `CF_Zone_ID` to the Cloudflare DNS Zone identifier.
-- set `CF_Account_ID` to your Cloudflare account identifier.
+- set `CF_API_TOKEN` to the Cloudflare API token.
 
 
 3. Run the application:
@@ -410,15 +383,7 @@ so that it uses the correct domain and postgresql credentials. Here are the temp
 Run the application using the following commands:
 
 ```sh
-./up.sh --build && docker logs -f acme.sh
-```
-
-If you used the staging server to issue certificates, please review and troubleshoot.
-Once you are happy, set the `LE_STAGING` variable in `.env` to `false` and re-issue the certificates:
-
-```sh
-rm -rf acme.sh/conf.d/
-./down.sh && ./up.sh && docker logs -f acme.sh
+./up.sh && docker logs -f 
 ```
 
 You may also want to setup [Certificate Authority Authorization (CAA)](#caa) at this point.
@@ -442,8 +407,6 @@ Should return:
 ```
 *.mydomain.com. 3600  IN  MX    10 app.mydomain.com
 ```
-
-Alternatively, you can update the `acme.sh/Dockerfiles/docker-entrypoint.sh` script and update the list of subdomains you want to issue SSL certificates for.
 
 The postfix configuration supports virtual aliases using the `postfix/conf.d/virtual` and `postfix/conf.d/virtual-regexp` files.
 Those files are automatically created on startup based upon the corresponding [`postfix/conf.d/virtual.tpl`](./postfix/conf.d/virtual.tpl)
