@@ -5,6 +5,7 @@ This is a self-hosted docker-compose configuration for [SimpleLogin](https://sim
 
 It is a fork from the excellent work done by [@springcomp](https://github.com/springcomp) at https://github.com/springcomp/self-hosted-simplelogin, and the key differences are
 - this fork uses [Caddy](https://github.com/caddyserver/caddy) instead of nginx because I am more familiar with it and wanted to host SimpleLogin on a server where I'm already running Caddy and Crowdsec and Postgres and re-use those
+- this fork assumes a build of Caddy with Crowdsec Bouncer for Caddy and Cloudflare module for Caddy as maintained [here](https://github.com/BJReplay/caddy-crowdsec-cf-dns) so it can use DNS challenges behind a Cloudflare proxy.
 - this fork reverts to 2048 key length DKIM but with a note below on setting up for 1024 if you run into problems.
 
 If you don't have those particular needs, please use the original github source noted above.  The original author has done a huge amount of work and deserves credit for putting this together.
@@ -85,13 +86,13 @@ Setting up DKIM is highly recommended to reduce the chance for your emails endin
 First you need to generate a private and public key for DKIM:
 
 ```bash
-openssl genrsa -traditional -out dkim.key 1024
+openssl genrsa -traditional -out dkim.key 2048
 openssl rsa -in dkim.key -pubout -out dkim.pub.key
 ```
 
 You will need the files `dkim.key` and `dkim.pub.key` for the next steps.
 
-For email gurus, we have chosen 1024 key length instead of 2048 for DNS simplicity as some registrars don't play well with long TXT record.
+If you run into problems with DKIM, that is probably because some registrars don't play well with long TXT record, so change `dkim.key 2048` to `dkim.key 1024` above, and try agaain.
 
 Set up DKIM by adding a **TXT record** for `dkim._domainkey.mydomain.com.` with the following value:
 
