@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+
+  ## CADDY
+  ## =================
+
+  caddy:
+    image: byreplay/caddy-crowdsec-cf-dns:latest
+    container_name: caddy
+    environment:
+      CF_API_TOKEN: "<TODO api token here>"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy-config:/config
+      - caddy-data:/data
+    ports:
+      - 443:443
+    networks:
+      - external_network
+      - internal_network
