@@ -3,9 +3,15 @@ SimpleLogin
 
 This is a self-hosted docker-compose configuration for [SimpleLogin](https://simplelogin.io).
 
+It is a fork from the excellent work done by [@springcomp](https://github.com/springcomp) at https://github.com/springcomp/self-hosted-simplelogin, and the key differences are
+- this fork uses [Caddy](https://github.com/caddyserver/caddy) instead of nginx because I am more familiar with it and wanted to host SimpleLogin on a server where I'm already running Caddy and Crowdsec and Postgres and re-use those
+- this fork reverts to 2048 key length DKIM but with a note below on setting up for 1024 if you run into problems.
+
+If you don't have those particular needs, please use the original github source noted above.  The original author has done a huge amount of work and deserves credit for putting this together.
+
 ## Prerequisites
 
-- a Linux server (either a VM or dedicated server). This doc shows the setup for Ubuntu 18.04 LTS but the steps could be adapted for other popular Linux distributions. As most of components run as Docker container and Docker can be a bit heavy, having at least 2 GB of RAM is recommended. The server needs to have the port 25 (email), 80, 443 (for the webapp), 22 (so you can ssh into it) open.
+- a Linux server (either a VM or dedicated server). This doc shows the setup for Ubuntu 22.04 LTS but the steps could be adapted for other popular Linux distributions. As most of components run as Docker container and Docker can be a bit heavy, having at least 2 GB of RAM is recommended. The server needs to have the port 25 (email), 80, 443 (for the webapp), 22 (so you can ssh into it) open.
 
 - a domain for which you can config the DNS. It could be a sub-domain. In the rest of the doc, let's say it's `mydomain.com` for the email and `app.mydomain.com` for SimpleLogin webapp. Please make sure to replace these values by your domain name and subdomain name whenever they appear in the doc. A trick we use is to download this README file on your computer and replace all `mydomain.com` and `app.mydomain.com` occurrences by your domain.
 
@@ -183,13 +189,21 @@ From Wikipedia https://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security
 
 HTTP Strict Transport Security is an extra step you can take to protect your web app from certain man-in-the-middle attacks. It does this by specifying an amount of time (usually a really long one) for which you should only accept HTTPS connections, not HTTP ones.
 
-This repository already enables HSTS, thanks to the following line to the `server` block of the Nginx configuration file:
+This repository already enables HSTS, thanks to the following Caddy configuration file:
 
 ```
-add_header Strict-Transport-Security "max-age: 31536000; includeSubDomains" always;
+(hsts) {
+  header Strict-Transport-Security max-age=63072000
+}
+
+TODO  {
+  import hsts
+  ...
+}
+
 ```
 
-(The `max-age` is the time in seconds to not permit a HTTP connection, in this case it's one year.)
+(The `max-age` is the time in seconds to not permit a HTTP connection, in this case it's two years.)
 
 ### CAA
 
@@ -330,8 +344,7 @@ Enable IPv6 for [the default bridge network](https://docs.docker.com/config/daem
 This procedure will guide you through running the entire stack using Docker containers.
 This includes:
 
-- nginx
-- [acme.sh](https://acme.sh) to request and issue SSL certs.
+- Caddy
 - The [SimpleLogin app](https://github.com/simple-login/app) containers
 - postfix
 
@@ -380,31 +393,12 @@ If using Cloudflare, update the following values in `.env`:
 - set `CF_Account_ID` to your Cloudflare account identifier.
 
 
-The SSL certificates will be available at the following locations:
-
-- `/etc/acme.sh/*.mydomain.com_ecc/fullchain.cer`
-- `/etc/acme.sh/*.mydomain.com_ecc/*.domain.tld.key`
-
-
-
-If you are using HTTP-01 challenge, update the SSL certificate and key locations in following files:
-
-- `nginx/conf.d/default.conf.tpl`
-- `postfix/conf.d/main.cf.tpl`
-
-Specifically, using HTTP-01, the SSL certificates are available at the following locations:
-
-- `/etc/acme.sh/mydomain.com_ecc/fullchain.cer`
-- `/etc/acme.sh/mydomain.com_ecc/domain.tld.key`
-
-
 3. Run the application:
 
 The `up.sh` shell script updates important configuration files from templates provided in this repository,
 so that it uses the correct domain and postgresql credentials. Here are the template files:
 
-- `acme.sh/www/.well-known/mta-sts.txt.tpl`
-- `nginx/conf.d/default.conf.tpl`
+- `caddy/Caddyfile`
 - `postfix/conf.d/aliases`
 - `postfix/conf.d/main.cf.tpl`
 - `postfix/conf.dl/pgsql-relay-domains.cf.tpl`
