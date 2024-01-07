@@ -3,6 +3,7 @@ version: "3.8"
 include:
   - caddy-compose.yaml
   - simple-login-compose.yaml
+  - postgres.yaml
   - postfix-compose.yaml
 
 networks:
