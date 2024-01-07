@@ -15,11 +15,9 @@ if [ -z "$SUBDOMAIN" ]; then
   SUBDOMAIN="app"
 fi
 
-sed -e "s/app.domain.tld/${SUBDOMAIN}.${DOMAIN}/g" ./acme.sh/www/.well-known/mta-sts.txt.tpl >./acme.sh/www/.well-known/mta-sts.txt
-
-if [ ! -f ./nginx/conf.d/default.conf ]; then
-  sed -e "s/app.domain.tld/${SUBDOMAIN}.${DOMAIN}/g" -e "s/domain.tld/${DOMAIN}/g" ./nginx/conf.d/default-init.conf.tpl > ./nginx/conf.d/default.conf
-  sed -e "s/app.domain.tld/${SUBDOMAIN}.${DOMAIN}/g" -e "s/domain.tld/${DOMAIN}/g" ./nginx/conf.d/default.conf.tpl > ./nginx/conf.d/nginx
+if [ ! -f ./Caddyfile ]; then
+  sed -e "s/app.domain.tld/${SUBDOMAIN}.${DOMAIN}/g" -e "s/domain.tld/${DOMAIN}/g" ./Caddyfile.tpl > ./Caddyfile
+  sed -e "s/app.domain.tld/${SUBDOMAIN}.${DOMAIN}/g" -e "s/domain.tld/${DOMAIN}/g" ./Caddyfile.tpl > ./Caddyfile
 fi
 
 sed -e "s/app.domain.tld/${SUBDOMAIN}.${DOMAIN}/g" -e "s/domain.tld/${DOMAIN}/g" ./postfix/conf.d/main.cf.tpl > ./postfix/conf.d/main.cf
