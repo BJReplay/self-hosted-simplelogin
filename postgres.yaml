@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:12.1
+    container_name: sl-db
+    env_file: .env
+    healthcheck:
+      test: [ "CMD", "pg_isready" ]
+      interval: 10s
+      retries: 3
+      start_period: 1s
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    restart: unless-stopped
