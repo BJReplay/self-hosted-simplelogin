@@ -1,0 +1,8 @@
+{
+  debug
+  admin localhost:2019
+  http_port 80
+  https_port 443
+  default_sni example.com
+  key_type rsa4096
+}
